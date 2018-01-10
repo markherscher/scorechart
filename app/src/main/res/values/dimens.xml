@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="score_chart_name_height">90dp</dimen>
+    <dimen name="score_chart_cell_width">65dp</dimen>
+    <dimen name="score_chart_cell_height">65dp</dimen>
+    <dimen name="score_chart_name_padding">10dp</dimen>
+</resources>
