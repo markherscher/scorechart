@@ -29,7 +29,7 @@ public class ScoreApplication extends Application {
                 public void execute(Realm r) {
                     Game g = new Game();
                     g.setId("foo");
-                    g.setName("whatever");
+                    g.setName("Magic");
 
                     Player p1 = new Player();
                     p1.setId(UUID.randomUUID().toString());

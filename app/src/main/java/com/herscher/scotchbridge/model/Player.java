@@ -9,17 +9,20 @@ import io.realm.annotations.PrimaryKey;
 
 public class Player extends RealmObject {
     public static final String ID = "id";
+    public static final String GAME_ID = "gameId";
     public static final String NAME = "name";
     public static final String STARTING_SCORE = "startingScore";
     public static final String SCORES = "scores";
 
     @PrimaryKey private String id;
+    //private String gameId;
     private RealmList<Score> scores;
     private String name;
     private int startingScore;
 
     public Player() {
         id = "";
+        //gameId = "";
         name = "";
         startingScore = 0;
         scores = new RealmList<>();
@@ -32,6 +35,15 @@ public class Player extends RealmObject {
     public void setId(String id) {
         this.id = id;
     }
+
+    /*
+    public String getGameId() {
+        return gameId;
+    }
+
+    public void setGameId(String gameId) {
+        this.gameId = gameId;
+    }*/
 
     @NonNull
     public RealmList<Score> getScores() {
@@ -53,6 +65,10 @@ public class Player extends RealmObject {
 
     public void setStartingScore(int startingScore) {
         this.startingScore = startingScore;
+    }
+
+    public void deleteChildrenFromRealm() {
+        scores.deleteAllFromRealm();
     }
 
     @Override

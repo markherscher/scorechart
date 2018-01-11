@@ -28,6 +28,8 @@ public class ChartCellView extends FrameLayout {
 
         if (value == null) {
             text = "";
+        } else if (value >= 0) {
+            text = "+" + value;
         } else {
             text = "" + value;
         }

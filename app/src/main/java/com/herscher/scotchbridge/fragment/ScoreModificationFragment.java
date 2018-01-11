@@ -110,6 +110,12 @@ public class ScoreModificationFragment extends DialogFragment {
         }
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        listener = null;
+    }
+
     @OnClick(R.id.decrement_multiple)
     void onDecrementMultiple() {
         setEnteredValue(getEnteredValue() - MULTIPLE_ADJUST_VALUE);
@@ -134,7 +140,7 @@ public class ScoreModificationFragment extends DialogFragment {
     @OnClick(R.id.ok_button)
     void onOkClicked() {
         if (listener != null) {
-            listener.onAccepted(playerId, scoreId, getEnteredValue());
+            listener.onScoreModified(playerId, scoreId, getEnteredValue());
         }
 
         dismiss();
@@ -143,7 +149,7 @@ public class ScoreModificationFragment extends DialogFragment {
     @OnClick(R.id.delete_button)
     void onDeleteButton() {
         if (listener != null) {
-            listener.onDeleted(playerId, scoreId);
+            listener.onScoreDeleted(playerId, scoreId);
         }
 
         dismiss();
@@ -163,8 +169,8 @@ public class ScoreModificationFragment extends DialogFragment {
     }
 
     public interface Listener {
-        void onAccepted(String playerId, String scoreId, int scoreValue);
+        void onScoreModified(String playerId, String scoreId, int scoreValue);
 
-        void onDeleted(String playerId, String scoreId);
+        void onScoreDeleted(String playerId, String scoreId);
     }
 }
