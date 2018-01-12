@@ -36,7 +36,7 @@ import io.realm.OrderedCollectionChangeSet;
 import io.realm.OrderedRealmCollectionChangeListener;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
-import io.realm.RealmList;
+import io.realm.RealmResults;
 
 public class ScoreChartActivity extends Activity implements ScoreModificationFragment.Listener, PlayerModificationFragment.Listener {
     public final static String GAME_ID_KEY = "game_id_key";
@@ -52,7 +52,9 @@ public class ScoreChartActivity extends Activity implements ScoreModificationFra
     private String gameId;
     private Realm realm;
     private Game game;
-    private List<Column> columnMap;
+    private Map<String, RealmResults<Score>> scoreMap;
+    private RealmResults<Player> playerResults;
+    private List<Column> columnList;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -60,7 +62,8 @@ public class ScoreChartActivity extends Activity implements ScoreModificationFra
         setContentView(R.layout.activity_score_chart);
         ButterKnife.bind(this);
 
-        columnMap = new ArrayList<>();
+        columnList = new ArrayList<>();
+        scoreMap = new HashMap<>();
         gameId = getIntent().getStringExtra(GAME_ID_KEY);
 
         // tODO:
@@ -83,28 +86,16 @@ public class ScoreChartActivity extends Activity implements ScoreModificationFra
 
         realm = Realm.getDefaultInstance();
         game = realm.where(Game.class).equalTo(Game.ID, gameId).findFirstAsync();
+        playerResults = realm.where(Player.class).equalTo(Player.GAME_ID, gameId).findAllSortedAsync(Player.ORDER);
+
         game.addChangeListener(new RealmChangeListener<Game>() {
             @Override
             public void onChange(Game game) {
                 toolbar.setTitle(game.getName());
-
-                game.getPlayers().removeAllChangeListeners();
-                game.getPlayers().addChangeListener(new PlayerChangeListener());
-
-                boolean isFirstTime = columnMap.size() == 0;
-
-                for (Player p : game.getPlayers()) {
-                    p.getScores().removeAllChangeListeners();
-                    p.getScores().addChangeListener(new ScoreChangeListener(p));
-
-                    // Only update if this is the first time...otherwise let the individual change
-                    // listeners handle it
-                    if (isFirstTime) {
-                        addPlayerColumn(p);
-                    }
-                }
             }
         });
+
+        playerResults.addChangeListener(playerChangeListener);
     }
 
     @Override
@@ -113,12 +104,12 @@ public class ScoreChartActivity extends Activity implements ScoreModificationFra
 
         // Remove all change listeners
         game.removeAllChangeListeners();
-        game.getPlayers().removeAllChangeListeners();
-
-        for (Player p : game.getPlayers()) {
-            p.getScores().removeAllChangeListeners();
+        playerResults.removeAllChangeListeners();
+        for (RealmResults<Score> r : scoreMap.values()) {
+            r.removeAllChangeListeners();
         }
 
+        scoreMap.clear();
         realm.close();
         realm = null;
     }
@@ -130,15 +121,16 @@ public class ScoreChartActivity extends Activity implements ScoreModificationFra
             realm.executeTransactionAsync(new Realm.Transaction() {
                 @Override
                 public void execute(Realm r) {
+                    Number maxOrder = r.where(Player.class)
+                            .equalTo(Player.GAME_ID, gameId).max(Player.ORDER);
+
                     Player player = new Player();
                     player.setId(UUID.randomUUID().toString());
                     player.setName(playerName);
                     player.setStartingScore(startingScore);
-
-                    Game game = r.where(Game.class).equalTo(Game.ID, gameId).findFirst();
-                    if (game != null) {
-                        game.getPlayers().add(player);
-                    }
+                    player.setGameId(gameId);
+                    player.setOrder(maxOrder == null ? 0 : maxOrder.intValue());
+                    r.copyToRealm(player);
                 }
             });
         } else {
@@ -158,23 +150,10 @@ public class ScoreChartActivity extends Activity implements ScoreModificationFra
 
     @Override
     public void onPlayerDeleted(@NonNull final String playerId) {
-        // Remove listeners so they don't fire when the scores are deleted
-        // TODO: do I need this if/when the scores are managed using an ordered listener?
-        for (Player p : game.getPlayers()) {
-            if (p.getId().equals(playerId)) {
-                p.getScores().removeAllChangeListeners();
-                break;
-            }
-        }
-
         realm.executeTransactionAsync(new Realm.Transaction() {
             @Override
             public void execute(Realm r) {
-                Player player = r.where(Player.class).equalTo(Player.ID, playerId).findFirst();
-                if (player != null) {
-                    player.deleteChildrenFromRealm();
-                    player.deleteFromRealm();
-                }
+                r.where(Player.class).equalTo(Player.ID, playerId).findAll().deleteAllFromRealm();
             }
         });
     }
@@ -187,14 +166,15 @@ public class ScoreChartActivity extends Activity implements ScoreModificationFra
                     new Realm.Transaction() {
                         @Override
                         public void execute(Realm r) {
+                            Number maxOrder = r.where(Score.class)
+                                    .equalTo(Score.PLAYER_ID, playerId).max(Score.ORDER);
+
                             Score newScore = new Score();
                             newScore.setId(UUID.randomUUID().toString());
                             newScore.setScoreChange(scoreValue);
-
-                            Player player = r.where(Player.class).equalTo(Player.ID, playerId).findFirst();
-                            if (player != null) {
-                                player.getScores().add(newScore);
-                            }
+                            newScore.setPlayerId(playerId);
+                            newScore.setOrder(maxOrder == null ? 0 : maxOrder.intValue());
+                            r.copyToRealm(newScore);
                         }
                     });
         } else {
@@ -218,10 +198,7 @@ public class ScoreChartActivity extends Activity implements ScoreModificationFra
                 new Realm.Transaction() {
                     @Override
                     public void execute(Realm r) {
-                        Score score = r.where(Score.class).equalTo(Score.ID, scoreId).findFirst();
-                        if (score != null) {
-                            score.deleteFromRealm();
-                        }
+                        r.where(Score.class).equalTo(Score.ID, scoreId).findAll().deleteAllFromRealm();
                     }
                 });
     }
@@ -281,18 +258,17 @@ public class ScoreChartActivity extends Activity implements ScoreModificationFra
         chartLayout.addView(columnView, params);
 
         Column column = new Column(holderLayout, name, totalScore, columnView, player.getId());
-        columnMap.add(column);
-        refreshPlayer(player);
+        columnList.add(column);
     }
 
     private void deletePlayerColumn(int index) {
-        Column column = columnMap.remove(index);
+        Column column = columnList.remove(index);
         headerLayout.removeView(column.holderLayout);
         chartLayout.removeView(column.columnView);
     }
 
     private void refreshPlayer(Player player) {
-        for (Column c : columnMap) {
+        for (Column c : columnList) {
             if (c.playerId.equals(player.getId())) {
                 c.name.setText(player.getName());
                 c.refreshAllScores();
@@ -317,35 +293,76 @@ public class ScoreChartActivity extends Activity implements ScoreModificationFra
                 }
             };
 
-    private class ScoreChangeListener implements RealmChangeListener<RealmList<Score>> {
-        final Player player;
+    private OrderedRealmCollectionChangeListener<RealmResults<Player>> playerChangeListener =
+            new OrderedRealmCollectionChangeListener<RealmResults<Player>>() {
+                @Override
+                public void onChange(RealmResults<Player> players, OrderedCollectionChangeSet changeSet) {
+                    if (changeSet != null) {
+                        for (int i : changeSet.getInsertions()) {
+                            // An added player
+                            insertPlayer(players.get(i));
+                        }
 
-        ScoreChangeListener(Player player) {
-            this.player = player;
+                        for (int i : changeSet.getDeletions()) {
+                            // A deleted player
+                            final String playerId = columnList.get(i).playerId;
+                            scoreMap.remove(playerId).removeAllChangeListeners();
+                            deletePlayerColumn(i);
+
+                            // Delete all the scores for this player as well
+                            realm.executeTransactionAsync(new Realm.Transaction() {
+                                @Override
+                                public void execute(Realm r) {
+                                    r.where(Score.class).equalTo(Score.PLAYER_ID, playerId)
+                                            .findAll().deleteAllFromRealm();
+                                }
+                            });
+                        }
+
+                        for (int i : changeSet.getChanges()) {
+                            // A modified player
+                            refreshPlayer(players.get(i));
+                        }
+                    } else {
+                        // The first pass
+                        for (Player p : players) {
+                            insertPlayer(p);
+                        }
+                    }
+                }
+
+                private void insertPlayer(Player player) {
+                    RealmResults<Score> scoreResults = realm.where(Score.class).equalTo(
+                            Score.PLAYER_ID, player.getId()).findAllSortedAsync(Score.ORDER);
+                    scoreMap.put(player.getId(), scoreResults);
+                    scoreResults.addChangeListener(new ScoreChangeListener(player.getId()));
+
+                    addPlayerColumn(player);
+                }
+            };
+
+    private class ScoreChangeListener implements OrderedRealmCollectionChangeListener<RealmResults<Score>> {
+        final String playerId;
+
+        ScoreChangeListener(String playerId) {
+            this.playerId = playerId;
         }
 
         @Override
-        public void onChange(RealmList<Score> scores) {
-            refreshPlayer(player);
-        }
-    }
-
-    private class PlayerChangeListener implements OrderedRealmCollectionChangeListener<RealmList<Player>> {
-        @Override
-        public void onChange(RealmList<Player> players, OrderedCollectionChangeSet changeSet) {
-            if (changeSet != null) {
-                for (int index : changeSet.getDeletions()) {
-                    deletePlayerColumn(index);
-                }
-
-                for (int index : changeSet.getChanges()) {
-                    refreshPlayer(players.get(index));
-                }
-
-                for (int index : changeSet.getInsertions()) {
-                    addPlayerColumn(players.get(index));
+        public void onChange(RealmResults<Score> scores, OrderedCollectionChangeSet changeSet) {
+            Column column = null;
+            for (Column c : columnList) {
+                if (c.playerId.equals(playerId)) {
+                    column = c;
+                    break;
                 }
             }
+
+            if (column == null) {
+                return;
+            }
+
+            column.refreshAllScores();
         }
     }
 
@@ -368,47 +385,48 @@ public class ScoreChartActivity extends Activity implements ScoreModificationFra
         @Override
         public void onCellClicked(final int cellIndex) {
             ScoreModificationFragment fragment;
-            Player player = realm.where(Player.class).equalTo(Player.ID, playerId).findFirst();
+            RealmResults<Score> scoreResults = scoreMap.get(playerId);
 
-            if (cellIndex >= player.getScores().size()) {
-                // The last cell
-                fragment = ScoreModificationFragment.newInstance(player.getId(),
-                        null);
-            } else {
-                // Not the last cell, so edit in place
-                fragment = ScoreModificationFragment.newInstance(player.getId(),
-                        player.getScores().get(cellIndex).getId());
+            if (scoreResults != null) {
+                if (cellIndex >= scoreResults.size()) {
+                    // The last cell
+                    fragment = ScoreModificationFragment.newInstance(playerId,
+                            null);
+                } else {
+                    // Not the last cell, so edit in place
+                    fragment = ScoreModificationFragment.newInstance(playerId,
+                            scoreResults.get(cellIndex).getId());
+                }
+
+                fragment.show(getFragmentManager(), "ScoreModificationFragment");
             }
-
-            fragment.show(getFragmentManager(), "ScoreModificationFragment");
         }
 
         void refreshAllScores() {
-            Player player = realm.where(Player.class).equalTo(Player.ID, playerId).findFirst();
-            if (player == null) {
-                return;
+            RealmResults<Score> scoreResults = scoreMap.get(playerId);
+
+            if (scoreResults != null) {
+                int desiredCellCount = scoreResults.size() + 1;
+                // Ensure we have enough
+                while (columnView.getCellCount() < desiredCellCount) {
+                    columnView.addCell();
+                }
+
+                // Ensure we don't have too many
+                while (columnView.getCellCount() > desiredCellCount) {
+                    columnView.removeCell(scoreResults.size() - 1);
+                }
+
+                int currentScore = 0;//player.getStartingScore(); TODO
+
+                for (int i = 0; i < scoreResults.size(); i++) {
+                    Score score = scoreResults.get(i);
+                    currentScore += score.getScoreChange();
+                    columnView.setCellValues(i, score.getScoreChange(), currentScore);
+                }
+
+                totalScore.setText(currentScore + "");
             }
-
-            int desiredCellCount = player.getScores().size() + 1;
-            // Ensure we have enough
-            while (columnView.getCellCount() < desiredCellCount) {
-                columnView.addCell();
-            }
-
-            // Ensure we don't have too many
-            while (columnView.getCellCount() > desiredCellCount) {
-                columnView.removeCell(player.getScores().size() - 1);
-            }
-
-            int currentScore = player.getStartingScore();
-
-            for (int i = 0; i < player.getScores().size(); i++) {
-                Score score = player.getScores().get(i);
-                currentScore += score.getScoreChange();
-                columnView.setCellValues(i, score.getScoreChange(), currentScore);
-            }
-
-            totalScore.setText(currentScore + "");
         }
     }
 }

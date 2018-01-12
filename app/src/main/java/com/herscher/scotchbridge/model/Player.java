@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
+import io.realm.annotations.Index;
 import io.realm.annotations.PrimaryKey;
 
 public class Player extends RealmObject {
@@ -12,20 +13,20 @@ public class Player extends RealmObject {
     public static final String GAME_ID = "gameId";
     public static final String NAME = "name";
     public static final String STARTING_SCORE = "startingScore";
-    public static final String SCORES = "scores";
+    public static final String ORDER = "order";
 
     @PrimaryKey private String id;
-    //private String gameId;
-    private RealmList<Score> scores;
+    @Index private String gameId;
     private String name;
     private int startingScore;
+    private int order;
 
     public Player() {
         id = "";
-        //gameId = "";
+        gameId = "";
         name = "";
         startingScore = 0;
-        scores = new RealmList<>();
+        order = 0;
     }
 
     public String getId() {
@@ -36,18 +37,12 @@ public class Player extends RealmObject {
         this.id = id;
     }
 
-    /*
     public String getGameId() {
         return gameId;
     }
 
     public void setGameId(String gameId) {
         this.gameId = gameId;
-    }*/
-
-    @NonNull
-    public RealmList<Score> getScores() {
-        return scores;
     }
 
     @NonNull
@@ -67,8 +62,12 @@ public class Player extends RealmObject {
         this.startingScore = startingScore;
     }
 
-    public void deleteChildrenFromRealm() {
-        scores.deleteAllFromRealm();
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 
     @Override

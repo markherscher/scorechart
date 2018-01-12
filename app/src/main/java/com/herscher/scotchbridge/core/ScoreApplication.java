@@ -34,15 +34,19 @@ public class ScoreApplication extends Application {
                     Player p1 = new Player();
                     p1.setId(UUID.randomUUID().toString());
                     p1.setName("Player 1");
+                    p1.setGameId("foo");
+                    p1.setOrder(0);
 
                     Player p2 = new Player();
                     p2.setId(UUID.randomUUID().toString());
                     p2.setName("Player 2");
+                    p2.setGameId("foo");
+                    p2.setOrder(1);
 
-                    g.getPlayers().add(p1);
-                    g.getPlayers().add(p2);
 
                     r.copyToRealm(g);
+                    r.copyToRealm(p1);
+                    r.copyToRealm(p2);
                 }
             });
         }
