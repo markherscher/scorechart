@@ -66,15 +66,9 @@ public class ScoreChartActivity extends Activity implements ScoreModificationFra
         scoreMap = new HashMap<>();
         gameId = getIntent().getStringExtra(GAME_ID_KEY);
 
-        // tODO:
-        gameId = "foo";
-
         if (gameId == null) {
             throw new IllegalStateException("missing game ID");
         }
-
-        realm = Realm.getDefaultInstance();
-        //game = realm.where(Game.class).equalTo(Game.ID, gameId).findFirst();
 
         toolbar.inflateMenu(R.menu.menu_score_chart_activity);
         toolbar.setOnMenuItemClickListener(menuClickListener);

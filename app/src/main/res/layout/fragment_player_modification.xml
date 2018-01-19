@@ -35,7 +35,7 @@
         android:layout_marginStart="20dp"
         android:ems="8"
         android:hint="starting score"
-        android:inputType="textCapWords" />
+        android:inputType="numberSigned" />
 
     <LinearLayout
         style="?android:attr/buttonBarStyle"
