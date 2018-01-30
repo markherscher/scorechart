@@ -16,7 +16,5 @@ public class ScoreApplication extends Application {
         super.onCreate();
 
         Realm.init(getApplicationContext());
-        RealmConfiguration.Builder builder = new RealmConfiguration.Builder();
-        Realm.setDefaultConfiguration(builder.build());
     }
 }

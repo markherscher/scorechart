@@ -4,5 +4,5 @@
     <item
         android:id="@+id/add_player"
         android:title="Add Player"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom" />
 </menu>

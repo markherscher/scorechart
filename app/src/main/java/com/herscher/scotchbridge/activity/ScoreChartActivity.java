@@ -5,6 +5,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -123,7 +124,7 @@ public class ScoreChartActivity extends Activity implements ScoreModificationFra
                     player.setName(playerName);
                     player.setStartingScore(startingScore);
                     player.setGameId(gameId);
-                    player.setOrder(maxOrder == null ? 0 : maxOrder.intValue());
+                    player.setOrder(maxOrder == null ? 0 : maxOrder.intValue() + 1);
                     r.copyToRealm(player);
                 }
             });
@@ -147,7 +148,21 @@ public class ScoreChartActivity extends Activity implements ScoreModificationFra
         realm.executeTransactionAsync(new Realm.Transaction() {
             @Override
             public void execute(Realm r) {
-                r.where(Player.class).equalTo(Player.ID, playerId).findAll().deleteAllFromRealm();
+                RealmResults<Player> players = r.where(Player.class).equalTo(Player.ID, playerId).findAll();
+                RealmResults<Score> scores = r.where(Score.class).equalTo(Score.PLAYER_ID, playerId).findAll();
+
+                final List<Player> playersBackup = r.copyFromRealm(players);
+                final List<Score> scoresBackup = r.copyFromRealm(scores);
+
+                players.deleteAllFromRealm();
+                scores.deleteAllFromRealm();
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        showGameDeleteUndoSnackbar(playersBackup, scoresBackup);
+                    }
+                });
             }
         });
     }
@@ -195,6 +210,24 @@ public class ScoreChartActivity extends Activity implements ScoreModificationFra
                         r.where(Score.class).equalTo(Score.ID, scoreId).findAll().deleteAllFromRealm();
                     }
                 });
+    }
+
+    private void showGameDeleteUndoSnackbar(final List<Player> players, final List<Score> scores) {
+        Snackbar.make(chartLayout, "Player deleted", Snackbar.LENGTH_LONG)
+                .setAction("Undo", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Add the player back
+                        realm.executeTransactionAsync(new Realm.Transaction() {
+                            @Override
+                            public void execute(Realm r) {
+                                r.copyToRealm(players);
+                                r.copyToRealm(scores);
+                            }
+                        });
+                    }
+                })
+                .show();
     }
 
     private void addPlayerColumn(Player player) {
@@ -249,10 +282,19 @@ public class ScoreChartActivity extends Activity implements ScoreModificationFra
                 cellWidth, LinearLayout.LayoutParams.MATCH_PARENT);
         params.setMargins(0, 0, 1, 0);
 
-        chartLayout.addView(columnView, params);
-
         Column column = new Column(holderLayout, name, totalScore, columnView, player.getId());
-        columnList.add(column);
+
+        // Add to list in correct location, based on player's order field
+        int index = 0;
+        for (int i = 0; i < playerResults.size(); i++) {
+            if (playerResults.get(i).getOrder() >= player.getOrder()) {
+                index = i;
+                break;
+            }
+        }
+
+        columnList.add(index, column);
+        chartLayout.addView(columnView, -3, params);
     }
 
     private void deletePlayerColumn(int index) {

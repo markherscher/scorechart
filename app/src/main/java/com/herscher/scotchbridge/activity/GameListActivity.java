@@ -113,14 +113,14 @@ public class GameListActivity extends Activity {
             new RealmChangeListener<RealmResults<Game>>() {
                 @Override
                 public void onChange(RealmResults<Game> gameList) {
+                    // For some reason this looks better slightly delayed
                     final boolean isEmpty = gameList.size() == 0;
-
-                    new Handler().postDelayed(new Runnable() {
+                    new Handler().post(new Runnable() {
                         @Override
                         public void run() {
                             noGamesText.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
                         }
-                    }, 250);
+                    });
                 }
             };
 
