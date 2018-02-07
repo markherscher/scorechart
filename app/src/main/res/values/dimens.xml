@@ -5,4 +5,5 @@
     <dimen name="score_chart_cell_height">65dp</dimen>
     <dimen name="score_chart_name_padding">10dp</dimen>
     <dimen name="game_list_margin">15dp</dimen>
+    <dimen name="score_modify_button">55dp</dimen>
 </resources>

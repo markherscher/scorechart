@@ -3,6 +3,7 @@ package com.herscher.scotchbridge.activity;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -120,13 +121,15 @@ public class ScoreListActivity extends Activity implements ScoreModificationFrag
 
     @Override
     public void onScoreDeleted(final String playerId, final int scoreIndex) {
+        final int scoreValue = player.getScores().get(scoreIndex).getScoreChange();
+
         realm.executeTransactionAsync(
                 new Realm.Transaction() {
                     @Override
                     public void execute(Realm r) {
                         Player player = r.where(Player.class).equalTo(Player.ID, playerId)
                                 .findFirst();
-                        if (player != null && player.getScores().size() > scoreIndex) {
+                        if (player != null) {
                             player.getScores().remove(scoreIndex);
                         }
                     }
@@ -135,6 +138,13 @@ public class ScoreListActivity extends Activity implements ScoreModificationFrag
                     public void onSuccess() {
                         scoreListAdapter.notifyItemRangeChanged(scoreIndex,
                                 scoreListAdapter.getItemCount() - scoreIndex);
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                showScoreDeleteUndoSnackbar(scoreValue, scoreIndex);
+                            }
+                        });
                     }
                 });
     }
@@ -143,6 +153,32 @@ public class ScoreListActivity extends Activity implements ScoreModificationFrag
     void onCreateScoreClicked() {
         ScoreModificationFragment fragment = ScoreModificationFragment.newInstance(playerId, -1);
         fragment.show(getFragmentManager(), "ScoreModificationFragment");
+    }
+
+    private void showScoreDeleteUndoSnackbar(final int scoreValue, final int scoreIndex) {
+        Snackbar.make(recyclerView, "Score deleted", Snackbar.LENGTH_LONG)
+                .setAction("Undo", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Add the player back
+                        realm.executeTransactionAsync(new Realm.Transaction() {
+                            @Override
+                            public void execute(Realm r) {
+                                Score newScore = new Score();
+                                newScore.setScoreChange(scoreValue);
+                                r.where(Player.class).equalTo(Player.ID, playerId).findFirst()
+                                        .getScores().add(scoreIndex, newScore);
+                            }
+                        }, new Realm.Transaction.OnSuccess() {
+                            @Override
+                            public void onSuccess() {
+                                scoreListAdapter.notifyItemRangeChanged(scoreIndex,
+                                        scoreListAdapter.getItemCount() - scoreIndex);
+                            }
+                        });
+                    }
+                })
+                .show();
     }
 
     private class PlayerChangeListener implements RealmChangeListener<RealmResults<Player>> {

@@ -166,6 +166,7 @@ public class ScoreModificationFragment extends DialogFragment {
 
     private void setEnteredValue(int value) {
         valueEntry.setText(value + "");
+        valueEntry.setSelection(valueEntry.getText().length());
     }
 
     public interface Listener {
