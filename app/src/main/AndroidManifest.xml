@@ -3,7 +3,7 @@
 
     <application
         android:name=".core.ScoreApplication"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -17,7 +17,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activity.ScoreChartActivity" />
+        <activity android:name=".activity.PlayerListActivity" />
+        <activity android:name=".activity.ScoreListActivity" />
 
     </application>
 </manifest>

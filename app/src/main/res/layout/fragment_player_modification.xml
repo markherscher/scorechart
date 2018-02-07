@@ -26,17 +26,6 @@
         android:hint="name"
         android:inputType="textCapWords" />
 
-    <EditText
-        android:id="@+id/starting_score"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginEnd="20dp"
-        android:layout_marginStart="20dp"
-        android:ems="8"
-        android:hint="starting score"
-        android:inputType="numberSigned" />
-
     <LinearLayout
         style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"

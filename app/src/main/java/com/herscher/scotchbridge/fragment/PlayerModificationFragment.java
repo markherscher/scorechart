@@ -27,7 +27,6 @@ public class PlayerModificationFragment extends DialogFragment {
     @BindView(R.id.delete_button) View deleteButton;
     @BindView(R.id.title_text) TextView titleText;
     @BindView(R.id.name) EditText name;
-    @BindView(R.id.starting_score) EditText startingScore;
 
     public static PlayerModificationFragment newInstance(@Nullable String playerId) {
         PlayerModificationFragment fragment = new PlayerModificationFragment();
@@ -60,7 +59,6 @@ public class PlayerModificationFragment extends DialogFragment {
             }
 
             name.setText(player.getName());
-            startingScore.setText(player.getStartingScore() + "");
             titleText.setText("Edit Player");
             realm.close();
         }
@@ -93,7 +91,6 @@ public class PlayerModificationFragment extends DialogFragment {
     void onOkClicked() {
         boolean isError = false;
         String playerName = name.getText().toString().trim();
-        String score = startingScore.getText().toString().trim();
 
         if (playerName.length() == 0) {
             name.setError("Name is required");
@@ -102,16 +99,9 @@ public class PlayerModificationFragment extends DialogFragment {
             name.setError(null);
         }
 
-        if (score.length() == 0) {
-            startingScore.setError("A starting score is required");
-            isError = true;
-        } else {
-            startingScore.setError(null);
-        }
-
         if (!isError) {
             if (listener != null) {
-                listener.onPlayerModified(playerId, playerName, Integer.parseInt(score));
+                listener.onPlayerModified(playerId, playerName);
             }
 
             dismiss();
@@ -128,7 +118,7 @@ public class PlayerModificationFragment extends DialogFragment {
     }
 
     public interface Listener {
-        void onPlayerModified(@Nullable String playerId, @NonNull String playerName, int startingScore);
+        void onPlayerModified(@Nullable String playerId, @NonNull String playerName);
 
         void onPlayerDeleted(@NonNull String playerId);
     }

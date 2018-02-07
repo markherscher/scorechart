@@ -74,19 +74,18 @@ public class GameListActivity extends Activity {
     }
 
     private void showGame(String gameId) {
-        Intent intent = new Intent(GameListActivity.this, ScoreChartActivity.class);
-        intent.putExtra(ScoreChartActivity.GAME_ID_KEY, gameId);
+        Intent intent = new Intent(this, PlayerListActivity.class);
+        intent.putExtra(PlayerListActivity.GAME_ID_KEY, gameId);
         startActivity(intent);
     }
 
-    private void showGameDeleteUndoSnackbar(final Game game, final List<Player> players,
-                                            final List<Score> scores) {
+    private void showGameDeleteUndoSnackbar(final Game game, final List<Player> players) {
         Snackbar.make(recyclerView, "Game deleted", Snackbar.LENGTH_LONG)
                 .setAction("Undo", new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         // Add the game back
-                        createNewGame(game, players, scores);
+                        createNewGame(game, players, new ArrayList<Score>());
                     }
                 })
                 .show();
@@ -146,7 +145,7 @@ public class GameListActivity extends Activity {
 
         GameViewHolder(ViewGroup parent) {
             super(LayoutInflater.from(parent.getContext()).inflate(
-                    R.layout.holder_game, parent, false));
+                    R.layout.view_game, parent, false));
             ButterKnife.bind(this, itemView);
         }
 
@@ -174,13 +173,9 @@ public class GameListActivity extends Activity {
 
                     RealmResults<Player> players = r.where(Player.class).equalTo(Player.GAME_ID, gameId).findAll();
                     final List<Player> playersBackup = r.copyFromRealm(players);
-                    final List<Score> scoresBackup = new ArrayList<>();
 
                     for (Player p : players) {
-                        RealmResults<Score> scores = r.where(Score.class)
-                                .equalTo(Score.PLAYER_ID, p.getId()).findAll();
-                        scoresBackup.addAll(r.copyFromRealm(scores));
-                        scores.deleteAllFromRealm();
+                        p.getScores().deleteAllFromRealm();
                     }
 
                     players.deleteAllFromRealm();
@@ -188,7 +183,7 @@ public class GameListActivity extends Activity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            showGameDeleteUndoSnackbar(gameBackup, playersBackup, scoresBackup);
+                            showGameDeleteUndoSnackbar(gameBackup, playersBackup);
                         }
                     });
                 }

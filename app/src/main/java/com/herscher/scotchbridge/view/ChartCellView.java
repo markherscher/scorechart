@@ -19,7 +19,7 @@ public class ChartCellView extends FrameLayout {
 
     public ChartCellView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        View view = inflate(context, R.layout.view_chart_cell, this);
+        View view = inflate(context, R.layout.view_score, this);
         ButterKnife.bind(this, view);
     }
 

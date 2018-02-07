@@ -12,21 +12,25 @@ public class Player extends RealmObject {
     public static final String ID = "id";
     public static final String GAME_ID = "gameId";
     public static final String NAME = "name";
-    public static final String STARTING_SCORE = "startingScore";
     public static final String ORDER = "order";
 
     @PrimaryKey private String id;
     @Index private String gameId;
     private String name;
-    private int startingScore;
     private int order;
+    private RealmList<Score> scores;
 
     public Player() {
         id = "";
         gameId = "";
         name = "";
-        startingScore = 0;
         order = 0;
+        scores = new RealmList<>();
+    }
+
+    @NonNull
+    public RealmList<Score> getScores() {
+        return scores;
     }
 
     public String getId() {
@@ -54,20 +58,32 @@ public class Player extends RealmObject {
         this.name = name == null ? "" : name;
     }
 
-    public int getStartingScore() {
-        return startingScore;
-    }
-
-    public void setStartingScore(int startingScore) {
-        this.startingScore = startingScore;
-    }
-
     public int getOrder() {
         return order;
     }
 
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    public int getTotalScore() {
+        int total = 0;
+
+        for (Score s : scores) {
+            total += s.getScoreChange();
+        }
+
+        return total;
+    }
+
+    public int getRunningTotal(int scoreIndex) {
+        int total = 0;
+
+        for (int i = 0; i <= scoreIndex; i++) {
+            total += scores.get(i).getScoreChange();
+        }
+
+        return total;
     }
 
     @Override
