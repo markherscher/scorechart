@@ -11,13 +11,15 @@
         android:layout_height="wrap_content"
         android:layout_margin="15dp"
         android:gravity="center"
-        android:textColor="@color/colorAccent"
-        android:textSize="20sp"
+        android:textColor="#000000"
+        android:textSize="28sp"
         tools:text="New Score" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="20dp"
         android:orientation="horizontal">
 
@@ -26,8 +28,9 @@
             android:layout_width="wrap_content"
             android:layout_height="@dimen/score_modify_button"
             android:layout_weight="1"
-            android:background="@android:color/transparent"
+            android:background="?attr/selectableItemBackground"
             android:text="-10"
+            android:textColor="@color/negative"
             android:textSize="18sp" />
 
         <Button
@@ -35,8 +38,9 @@
             android:layout_width="wrap_content"
             android:layout_height="@dimen/score_modify_button"
             android:layout_weight="1"
-            android:background="@android:color/transparent"
+            android:background="?attr/selectableItemBackground"
             android:text="-1"
+            android:textColor="@color/negative"
             android:textSize="30sp" />
 
         <EditText
@@ -45,7 +49,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
             android:layout_marginStart="10dp"
-            android:ems="3"
+            android:ems="2"
             android:gravity="center_horizontal"
             android:inputType="numberSigned"
             android:textSize="36sp" />
@@ -55,8 +59,9 @@
             android:layout_width="wrap_content"
             android:layout_height="@dimen/score_modify_button"
             android:layout_weight="1"
-            android:background="@android:color/transparent"
+            android:background="?attr/selectableItemBackground"
             android:text="+1"
+            android:textColor="@color/positive"
             android:textSize="30sp" />
 
         <Button
@@ -64,8 +69,9 @@
             android:layout_width="wrap_content"
             android:layout_height="@dimen/score_modify_button"
             android:layout_weight="1"
-            android:background="@android:color/transparent"
+            android:background="?attr/selectableItemBackground"
             android:text="+10"
+            android:textColor="@color/positive"
             android:textSize="18sp" />
 
     </LinearLayout>

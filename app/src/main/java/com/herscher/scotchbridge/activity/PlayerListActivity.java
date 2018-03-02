@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -182,10 +183,20 @@ public class PlayerListActivity extends Activity implements PlayerModificationFr
         }
 
         void setPlayer(Player player) {
+            int totalScore = player.getTotalScore();
+
             playerId = player.getId();
             playerName.setText(player.getName());
-            score.setText(player.getTotalScore() + "");
+            score.setText(totalScore + "");
             editCount.setText(player.getScores().size() + "");
+
+            if (totalScore < 0) {
+                score.setTextColor(ContextCompat.getColor(PlayerListActivity.this,
+                        R.color.negative));
+            } else {
+                score.setTextColor(ContextCompat.getColor(PlayerListActivity.this,
+                        R.color.positive));
+            }
         }
     }
 

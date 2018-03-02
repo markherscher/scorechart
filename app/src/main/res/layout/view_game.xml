@@ -7,12 +7,16 @@
     android:layout_marginStart="@dimen/game_list_margin"
     android:layout_marginTop="15dp"
     app:cardCornerRadius="4dp"
-    app:cardElevation="5dp">
+    app:cardElevation="5dp"
+    app:cardPreventCornerOverlap="false">
 
     <LinearLayout
         android:id="@+id/game_holder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/transparent_selectable_back"
+        android:clickable="true"
+        android:focusable="true"
         android:orientation="horizontal">
 
         <TextView

@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +34,7 @@ import io.realm.RealmResults;
 public class GameListActivity extends Activity {
     @BindView(R.id.recycler_view) RecyclerView recyclerView;
     @BindView(R.id.no_games_text) TextView noGamesText;
+    @BindView(R.id.toolbar) Toolbar toolbar;
 
     private Realm realm;
     private GameRecyclerAdapter adapter;
@@ -44,6 +46,7 @@ public class GameListActivity extends Activity {
         setContentView(R.layout.activity_game_list);
         ButterKnife.bind(this);
 
+        toolbar.setTitle("List of Games");
         adapter = new GameRecyclerAdapter();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);

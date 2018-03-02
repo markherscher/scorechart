@@ -14,6 +14,9 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/transparent_selectable_back"
+        android:clickable="true"
+        android:focusable="true"
         android:padding="10dp">
 
         <TextView
@@ -24,6 +27,7 @@
             android:lines="1"
             android:textColor="#000000"
             android:textSize="20sp"
+            android:textStyle="bold"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Mark" />
 
@@ -34,7 +38,6 @@
             android:layout_marginEnd="10dp"
             android:gravity="center"
             android:lines="1"
-            android:textColor="#008000"
             android:textSize="50sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@+id/modify_button"

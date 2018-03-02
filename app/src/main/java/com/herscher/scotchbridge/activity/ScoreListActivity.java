@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -219,6 +220,14 @@ public class ScoreListActivity extends Activity implements ScoreModificationFrag
                 scoreIndex = index;
                 incrementalScore.setText(valueToString(score.getScoreChange(), true));
                 overallScore.setText(valueToString(player.getRunningTotal(index), false));
+
+                if (score.getScoreChange() < 0) {
+                    incrementalScore.setTextColor(ContextCompat.getColor(ScoreListActivity.this,
+                            R.color.negative));
+                } else {
+                    incrementalScore.setTextColor(ContextCompat.getColor(ScoreListActivity.this,
+                            R.color.positive));
+                }
             }
         }
 
