@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.herscher.scotchbridge.R;
+import com.herscher.scotchbridge.fragment.NameModificationFragment;
 import com.herscher.scotchbridge.model.Game;
 import com.herscher.scotchbridge.model.Player;
 import com.herscher.scotchbridge.model.Score;
@@ -31,7 +33,7 @@ import io.realm.RealmChangeListener;
 import io.realm.RealmRecyclerViewAdapter;
 import io.realm.RealmResults;
 
-public class GameListActivity extends Activity {
+public class GameListActivity extends Activity implements NameModificationFragment.Listener {
     @BindView(R.id.recycler_view) RecyclerView recyclerView;
     @BindView(R.id.no_games_text) TextView noGamesText;
     @BindView(R.id.toolbar) Toolbar toolbar;
@@ -68,12 +70,22 @@ public class GameListActivity extends Activity {
         realm.close();
     }
 
+    @Override
+    public void onNameModified(@NonNull NameModificationFragment fragment,
+                               @Nullable String itemId, @NonNull String newName) {
+        if (itemId == null) {
+            // Create new game
+            Game newGame = new Game();
+            newGame.setId(UUID.randomUUID().toString());
+            newGame.setName(newName);
+            createNewGame(newGame, null, null);
+        }
+    }
+
     @OnClick(R.id.create_game)
     void onCreateGameClicked() {
-        Game newGame = new Game();
-        newGame.setId(UUID.randomUUID().toString());
-        newGame.setName("Game Name");
-        createNewGame(newGame, null, null);
+        NameModificationFragment.newInstance(null, "", "Create New Game")
+                .show(getFragmentManager(), "NameModificationFragment");
     }
 
     private void showGame(String gameId) {

@@ -2,6 +2,7 @@ package com.herscher.scotchbridge.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
@@ -9,11 +10,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.herscher.scotchbridge.R;
+import com.herscher.scotchbridge.fragment.NameModificationFragment;
 import com.herscher.scotchbridge.fragment.ScoreModificationFragment;
 import com.herscher.scotchbridge.model.Player;
 import com.herscher.scotchbridge.model.Score;
@@ -27,13 +30,16 @@ import io.realm.RealmChangeListener;
 import io.realm.RealmRecyclerViewAdapter;
 import io.realm.RealmResults;
 
-public class ScoreListActivity extends Activity implements ScoreModificationFragment.Listener {
+public class ScoreListActivity extends Activity implements ScoreModificationFragment.Listener,
+        NameModificationFragment.Listener {
     public final static String PLAYER_ID_KEY = "player_id_key";
+    private final static String RENAME_PLAYER_TAG = "rename_player_tag";
 
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.recycler_view) RecyclerView recyclerView;
     @BindView(R.id.total_score) TextView totalScore;
     @BindView(R.id.entry_count) TextView entryCount;
+    @BindView(R.id.no_scores_text) TextView noScoresText;
     private Realm realm;
     private String playerId;
     private RealmResults<Player> playerResults;
@@ -56,6 +62,24 @@ public class ScoreListActivity extends Activity implements ScoreModificationFrag
             @Override
             public void onClick(View view) {
                 finish();
+            }
+        });
+        toolbar.inflateMenu(R.menu.menu_score_list);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_delete:
+                        deletePlayer(playerId);
+                        return true;
+
+                    case R.id.action_rename:
+                        NameModificationFragment fragment = NameModificationFragment.newInstance(
+                                playerId, player.getName(), "Rename Player");
+                        fragment.show(getFragmentManager(), RENAME_PLAYER_TAG);
+                        return true;
+                }
+                return false;
             }
         });
 
@@ -122,8 +146,6 @@ public class ScoreListActivity extends Activity implements ScoreModificationFrag
 
     @Override
     public void onScoreDeleted(final String playerId, final int scoreIndex) {
-        final int scoreValue = player.getScores().get(scoreIndex).getScoreChange();
-
         realm.executeTransactionAsync(
                 new Realm.Transaction() {
                     @Override
@@ -139,13 +161,6 @@ public class ScoreListActivity extends Activity implements ScoreModificationFrag
                     public void onSuccess() {
                         scoreListAdapter.notifyItemRangeChanged(scoreIndex,
                                 scoreListAdapter.getItemCount() - scoreIndex);
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                showScoreDeleteUndoSnackbar(scoreValue, scoreIndex);
-                            }
-                        });
                     }
                 });
     }
@@ -156,30 +171,44 @@ public class ScoreListActivity extends Activity implements ScoreModificationFrag
         fragment.show(getFragmentManager(), "ScoreModificationFragment");
     }
 
-    private void showScoreDeleteUndoSnackbar(final int scoreValue, final int scoreIndex) {
-        Snackbar.make(recyclerView, "Score deleted", Snackbar.LENGTH_LONG)
-                .setAction("Undo", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // Add the player back
-                        realm.executeTransactionAsync(new Realm.Transaction() {
-                            @Override
-                            public void execute(Realm r) {
-                                Score newScore = new Score();
-                                newScore.setScoreChange(scoreValue);
-                                r.where(Player.class).equalTo(Player.ID, playerId).findFirst()
-                                        .getScores().add(scoreIndex, newScore);
-                            }
-                        }, new Realm.Transaction.OnSuccess() {
-                            @Override
-                            public void onSuccess() {
-                                scoreListAdapter.notifyItemRangeChanged(scoreIndex,
-                                        scoreListAdapter.getItemCount() - scoreIndex);
-                            }
-                        });
+    @Override
+    public void onNameModified(@NonNull NameModificationFragment fragment,
+                               @Nullable final String itemId, @NonNull final String newName) {
+        if (RENAME_PLAYER_TAG.equals(fragment.getTag())) {
+            realm.executeTransactionAsync(new Realm.Transaction() {
+                @Override
+                public void execute(Realm r) {
+                    Player player = r.where(Player.class).equalTo("id", itemId).findFirst();
+                    if (player != null) {
+                        player.setName(newName);
                     }
-                })
-                .show();
+                }
+            }, new Realm.Transaction.OnSuccess() {
+                @Override
+                public void onSuccess() {
+                    toolbar.setTitle(player.getName());
+                }
+            });
+        }
+    }
+
+    private void deletePlayer(@NonNull final String playerId) {
+        realm.executeTransactionAsync(new Realm.Transaction() {
+            @Override
+            public void execute(Realm r) {
+                Player player = r.where(Player.class).equalTo(Player.ID, playerId).findFirst();
+
+                if (player != null) {
+                    player.getScores().deleteAllFromRealm();
+                    player.deleteFromRealm();
+                }
+            }
+        }, new Realm.Transaction.OnSuccess() {
+            @Override
+            public void onSuccess() {
+                finish();
+            }
+        });
     }
 
     private class PlayerChangeListener implements RealmChangeListener<RealmResults<Player>> {
@@ -193,6 +222,7 @@ public class ScoreListActivity extends Activity implements ScoreModificationFrag
                 toolbar.setTitle(player.getName());
                 entryCount.setText(String.format("Entries: %d", player.getScores().size()));
                 totalScore.setText(String.format("Score: %d", player.getTotalScore()));
+                noScoresText.setVisibility(player.getScores().size() == 0 ? View.VISIBLE : View.GONE);
 
                 if (!scoresSet) {
                     scoreListAdapter.updateData(player.getScores());

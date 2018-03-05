@@ -28,6 +28,7 @@
         android:layout_margin="@dimen/game_list_margin"
         android:text="You have no saved games.\n\nTo create a new game click the plus button below."
         android:textSize="18sp"
+        android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
