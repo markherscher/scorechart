@@ -4,5 +4,5 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="positive">#008000</color>
-    <color name="negative">#800000</color>
+    <color name="negative">#F00000</color>
 </resources>

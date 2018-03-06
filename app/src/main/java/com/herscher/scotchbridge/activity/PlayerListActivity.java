@@ -1,6 +1,7 @@
 package com.herscher.scotchbridge.activity;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -13,10 +14,12 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.herscher.scotchbridge.R;
 import com.herscher.scotchbridge.fragment.NameModificationFragment;
+import com.herscher.scotchbridge.model.DeleteHelper;
 import com.herscher.scotchbridge.model.Game;
 import com.herscher.scotchbridge.model.Player;
 
@@ -174,24 +177,9 @@ public class PlayerListActivity extends Activity implements NameModificationFrag
     }
 
     private void handleGameDelete() {
-        realm.executeTransactionAsync(new Realm.Transaction() {
+        DeleteHelper.deleteGame(gameId, realm, new Runnable() {
             @Override
-            public void execute(Realm r) {
-                Game game = r.where(Game.class).equalTo(Game.ID, gameId).findFirst();
-                if (game != null) {
-                    game.deleteFromRealm();
-                }
-
-                RealmResults<Player> players = r.where(Player.class).equalTo(Player.GAME_ID, gameId).findAll();
-                for (Player p : players) {
-                    p.getScores().deleteAllFromRealm();
-                }
-
-                players.deleteAllFromRealm();
-            }
-        }, new Realm.Transaction.OnSuccess() {
-            @Override
-            public void onSuccess() {
+            public void run() {
                 finish();
             }
         });
@@ -213,31 +201,57 @@ public class PlayerListActivity extends Activity implements NameModificationFrag
         @BindView(R.id.player_name) TextView playerName;
         @BindView(R.id.score) TextView score;
         @BindView(R.id.edit_count) TextView editCount;
-        String playerId;
+        @BindView(R.id.player_menu) View playerMenu;
+        PopupMenu popupMenu;
+        Player player;
 
         PlayerViewHolder(ViewGroup parent) {
             super(LayoutInflater.from(parent.getContext()).inflate(
                     R.layout.view_player, parent, false));
 
             ButterKnife.bind(this, itemView);
+
+            popupMenu = new PopupMenu(PlayerListActivity.this, playerMenu);
+            popupMenu.inflate(R.menu.menu_score_list);
+            popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem) {
+                    switch (menuItem.getItemId()) {
+                        case R.id.action_delete:
+                            if (player != null) {
+                                DeleteHelper.deletePlayer(player.getId(), realm, null);
+                            }
+                            return true;
+
+                        case R.id.action_rename:
+                            if (player != null) {
+                                DialogFragment f = NameModificationFragment.newInstance(
+                                        player.getId(), player.getName(), "Rename Player");
+                                f.show(getFragmentManager(), PLAYER_RENAME_TAG);
+                            }
+                            return true;
+                    }
+                    return false;
+                }
+            });
         }
 
-        @OnClick(R.id.modify_button)
+        @OnClick(R.id.player_menu)
         void onModifyClicked() {
-            // todo
+            popupMenu.show();
         }
 
         @OnClick(R.id.container)
         void onContainerClicked() {
             Intent intent = new Intent(PlayerListActivity.this, ScoreListActivity.class);
-            intent.putExtra(ScoreListActivity.PLAYER_ID_KEY, playerId);
+            intent.putExtra(ScoreListActivity.PLAYER_ID_KEY, player.getId());
             startActivity(intent);
         }
 
         void setPlayer(Player player) {
             int totalScore = player.getTotalScore();
 
-            playerId = player.getId();
+            this.player = player;
             playerName.setText(player.getName());
             score.setText(totalScore + "");
             editCount.setText(player.getScores().size() + "");

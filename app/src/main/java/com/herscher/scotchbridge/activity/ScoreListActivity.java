@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.herscher.scotchbridge.R;
 import com.herscher.scotchbridge.fragment.NameModificationFragment;
 import com.herscher.scotchbridge.fragment.ScoreModificationFragment;
+import com.herscher.scotchbridge.model.DeleteHelper;
 import com.herscher.scotchbridge.model.Player;
 import com.herscher.scotchbridge.model.Score;
 
@@ -193,19 +194,9 @@ public class ScoreListActivity extends Activity implements ScoreModificationFrag
     }
 
     private void deletePlayer(@NonNull final String playerId) {
-        realm.executeTransactionAsync(new Realm.Transaction() {
+        DeleteHelper.deletePlayer(playerId, realm, new Runnable() {
             @Override
-            public void execute(Realm r) {
-                Player player = r.where(Player.class).equalTo(Player.ID, playerId).findFirst();
-
-                if (player != null) {
-                    player.getScores().deleteAllFromRealm();
-                    player.deleteFromRealm();
-                }
-            }
-        }, new Realm.Transaction.OnSuccess() {
-            @Override
-            public void onSuccess() {
+            public void run() {
                 finish();
             }
         });

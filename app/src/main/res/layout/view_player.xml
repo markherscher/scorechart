@@ -16,18 +16,21 @@
         android:layout_height="wrap_content"
         android:background="@drawable/transparent_selectable_back"
         android:clickable="true"
-        android:focusable="true"
-        android:padding="10dp">
+        android:focusable="true">
 
         <TextView
             android:id="@+id/player_name"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:lines="1"
+            android:paddingStart="15dp"
+            android:paddingTop="10dp"
             android:textColor="#000000"
             android:textSize="20sp"
             android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/player_menu"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Mark" />
 
@@ -40,7 +43,7 @@
             android:lines="1"
             android:textSize="50sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@+id/modify_button"
+            app:layout_constraintEnd_toStartOf="@+id/player_menu"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/player_name"
             tools:text="132" />
@@ -51,6 +54,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:lines="1"
+            android:paddingBottom="10dp"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="@+id/score"
             app:layout_constraintStart_toStartOf="@+id/score"
@@ -58,13 +62,15 @@
             tools:text="15" />
 
         <ImageView
-            android:id="@+id/modify_button"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            app:layout_constraintBottom_toBottomOf="@id/score"
+            android:id="@+id/player_menu"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_gravity="center"
+            android:background="?actionBarItemBackground"
+            android:scaleType="center"
+            android:src="@drawable/ic_more_vert_black_24dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/score"
-            app:srcCompat="@drawable/ic_add_circle" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </android.support.constraint.ConstraintLayout>
 </android.support.v7.widget.CardView>
