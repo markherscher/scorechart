@@ -11,6 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="15dp"
         android:gravity="center"
+        android:textColor="#000000"
         android:textSize="20sp"
         tools:text="New score for Mark" />
 
@@ -38,7 +39,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Cancel" />
+            android:text="Cancel"
+            android:visibility="invisible" />
 
         <Button
             android:id="@+id/ok_button"
