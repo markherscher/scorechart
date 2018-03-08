@@ -226,6 +226,7 @@ public class ScoreListActivity extends Activity implements ScoreModificationFrag
     class ScoreViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.incremental_score) TextView incrementalScore;
         @BindView(R.id.overall_score) TextView overallScore;
+        @BindView(R.id.entry_count) TextView entryCount;
         int scoreIndex;
 
         ScoreViewHolder(ViewGroup parent) {
@@ -241,6 +242,7 @@ public class ScoreListActivity extends Activity implements ScoreModificationFrag
                 scoreIndex = index;
                 incrementalScore.setText(valueToString(score.getScoreChange(), true));
                 overallScore.setText(valueToString(player.getRunningTotal(index), false));
+                entryCount.setText((index + 1) + "");
 
                 if (score.getScoreChange() < 0) {
                     incrementalScore.setTextColor(ContextCompat.getColor(ScoreListActivity.this,

@@ -72,11 +72,11 @@ public class ScoreModificationFragment extends DialogFragment {
             }
 
             scoreValue = player.getScores().get(scoreIndex).getScoreChange();
-            titleText.setText("Adjust Score");
+            titleText.setText("Adjust Score Entry");
         } else {
             // New value, so don't delete
             deleteButton.setVisibility(View.INVISIBLE);
-            titleText.setText("New Score");
+            titleText.setText("Create Score Entry");
         }
 
         if (savedInstanceState != null && savedInstanceState.containsKey(EDIT_VALUE_KEY)) {

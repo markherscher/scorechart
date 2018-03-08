@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="60dp"
     android:layout_marginBottom="5dp"
     android:clickable="true"
     android:focusable="true">
+
+    <android.support.constraint.Guideline
+        android:id="@+id/center_vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
 
     <LinearLayout
         android:id="@+id/score_holder"
@@ -18,7 +26,9 @@
         android:paddingBottom="5dp"
         android:paddingEnd="10dp"
         android:paddingStart="10dp"
-        android:paddingTop="5dp">
+        android:paddingTop="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <TextView
             android:id="@+id/incremental_score"
@@ -41,4 +51,14 @@
             tools:text="400" />
     </LinearLayout>
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/entry_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/score_holder"
+        app:layout_constraintEnd_toStartOf="@+id/score_holder"
+        app:layout_constraintTop_toTopOf="@+id/score_holder"
+        tools:text="4" />
+
+</android.support.constraint.ConstraintLayout>
