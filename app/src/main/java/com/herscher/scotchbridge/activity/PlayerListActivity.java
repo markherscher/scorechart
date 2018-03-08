@@ -23,8 +23,11 @@ import com.herscher.scotchbridge.model.DeleteHelper;
 import com.herscher.scotchbridge.model.Game;
 import com.herscher.scotchbridge.model.Player;
 
+import java.util.Locale;
 import java.util.UUID;
 
+import butterknife.BindDimen;
+import butterknife.BindInt;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -42,6 +45,7 @@ public class PlayerListActivity extends Activity implements NameModificationFrag
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.recycler_view) RecyclerView recyclerView;
     @BindView(R.id.no_players_text) TextView noPlayersText;
+    @BindInt(R.integer.score_list_column_count) int columnCount;
 
     private String gameId;
     private Game game;
@@ -84,7 +88,7 @@ public class PlayerListActivity extends Activity implements NameModificationFrag
         });
 
         adapter = new PlayerAdapter(null);
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        recyclerView.setLayoutManager(new GridLayoutManager(this, columnCount));
         recyclerView.setAdapter(adapter);
     }
 
@@ -254,17 +258,8 @@ public class PlayerListActivity extends Activity implements NameModificationFrag
             this.player = player;
             playerName.setText(player.getName());
             score.setText(totalScore + "");
-            editCount.setText(player.getScores().size() + "");
-
-            /*
-            if (totalScore < 0) {
-                score.setTextColor(ContextCompat.getColor(PlayerListActivity.this,
-                        R.color.negative));
-            } else {
-                score.setTextColor(ContextCompat.getColor(PlayerListActivity.this,
-                        R.color.positive));
-            }
-            */
+            editCount.setText(String.format(Locale.US, "Entries: %d",
+                    player.getScores().size()));
         }
     }
 

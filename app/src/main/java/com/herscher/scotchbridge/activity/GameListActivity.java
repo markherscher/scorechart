@@ -50,7 +50,7 @@ public class GameListActivity extends Activity implements NameModificationFragme
         setContentView(R.layout.activity_game_list);
         ButterKnife.bind(this);
 
-        toolbar.setTitle("List of Games");
+        toolbar.setTitle("All Games");
         adapter = new GameRecyclerAdapter();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);

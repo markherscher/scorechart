@@ -55,7 +55,7 @@
             android:gravity="center"
             android:lines="1"
             android:paddingBottom="10dp"
-            android:textSize="16sp"
+            android:textSize="13sp"
             app:layout_constraintEnd_toEndOf="@+id/score"
             app:layout_constraintStart_toStartOf="@+id/score"
             app:layout_constraintTop_toBottomOf="@+id/score"
