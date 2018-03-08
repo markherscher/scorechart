@@ -256,6 +256,7 @@ public class PlayerListActivity extends Activity implements NameModificationFrag
             score.setText(totalScore + "");
             editCount.setText(player.getScores().size() + "");
 
+            /*
             if (totalScore < 0) {
                 score.setTextColor(ContextCompat.getColor(PlayerListActivity.this,
                         R.color.negative));
@@ -263,6 +264,7 @@ public class PlayerListActivity extends Activity implements NameModificationFrag
                 score.setTextColor(ContextCompat.getColor(PlayerListActivity.this,
                         R.color.positive));
             }
+            */
         }
     }
 
