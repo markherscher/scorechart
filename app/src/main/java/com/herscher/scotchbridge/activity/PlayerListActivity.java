@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 
 import com.herscher.scotchbridge.R;
 import com.herscher.scotchbridge.fragment.NameModificationFragment;
+import com.herscher.scotchbridge.fragment.SimpleQuestionDialogFragment;
 import com.herscher.scotchbridge.model.DeleteHelper;
 import com.herscher.scotchbridge.model.Game;
 import com.herscher.scotchbridge.model.Player;
@@ -37,10 +39,13 @@ import io.realm.RealmChangeListener;
 import io.realm.RealmRecyclerViewAdapter;
 import io.realm.RealmResults;
 
-public class PlayerListActivity extends Activity implements NameModificationFragment.Listener {
+public class PlayerListActivity extends Activity implements NameModificationFragment.Listener,
+        SimpleQuestionDialogFragment.Callbacks {
     public static final String GAME_ID_KEY = "game_id_key";
     private static final String GAME_RENAME_TAG = "game_rename_tag";
     private static final String PLAYER_RENAME_TAG = "player_rename_tag";
+    private static final String GAME_DELETE_TAG = "game_delete_tag";
+    private static final String PLAYER_DELETE_TAG = "player_delete_tag";
 
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.recycler_view) RecyclerView recyclerView;
@@ -123,7 +128,23 @@ public class PlayerListActivity extends Activity implements NameModificationFrag
         } else if (GAME_RENAME_TAG.equals(fragment.getTag())) {
             renameGame(itemId, newName);
         }
+    }
 
+    @Override
+    public void onQuestionChoice(SimpleQuestionDialogFragment fragment,
+                                 SimpleQuestionDialogFragment.Choice choice, String data) {
+        if (choice == SimpleQuestionDialogFragment.Choice.POSITIVE) {
+            if (GAME_DELETE_TAG.equals(fragment.getTag())) {
+                DeleteHelper.deleteGame(gameId, realm, new Runnable() {
+                    @Override
+                    public void run() {
+                        finish();
+                    }
+                });
+            } else if (PLAYER_DELETE_TAG.equals(fragment.getTag())) {
+                DeleteHelper.deletePlayer(data, realm, null);
+            }
+        }
     }
 
     private void renamePlayer(final String itemId, final String newName) {
@@ -181,12 +202,27 @@ public class PlayerListActivity extends Activity implements NameModificationFrag
     }
 
     private void handleGameDelete() {
-        DeleteHelper.deleteGame(gameId, realm, new Runnable() {
-            @Override
-            public void run() {
-                finish();
-            }
-        });
+        DialogFragment f =
+                SimpleQuestionDialogFragment.newInstance(
+                        "Delete Game",
+                        "Are you sure you want to delete this game?",
+                        "No",
+                        "Yes",
+                        game.getId());
+
+        f.show(getFragmentManager(), GAME_DELETE_TAG);
+    }
+
+    private void handlePlayerDelete(Player player) {
+        DialogFragment f =
+                SimpleQuestionDialogFragment.newInstance(
+                        "Delete Player",
+                        "Are you sure you want to delete this player?",
+                        "No",
+                        "Yes",
+                        player.getId());
+
+        f.show(getFragmentManager(), PLAYER_DELETE_TAG);
     }
 
     private void handleGameRename() {
@@ -197,7 +233,14 @@ public class PlayerListActivity extends Activity implements NameModificationFrag
     private class PlayerChangeListener implements RealmChangeListener<RealmResults<Player>> {
         @Override
         public void onChange(RealmResults<Player> players) {
-            noPlayersText.setVisibility(players.size() == 0 ? View.VISIBLE : View.INVISIBLE);
+            // For some reason this looks better slightly delayed
+            final boolean isEmpty = players.size() == 0;
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    noPlayersText.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+                }
+            }, 250);
         }
     }
 
@@ -223,7 +266,7 @@ public class PlayerListActivity extends Activity implements NameModificationFrag
                     switch (menuItem.getItemId()) {
                         case R.id.action_delete:
                             if (player != null) {
-                                DeleteHelper.deletePlayer(player.getId(), realm, null);
+                                handlePlayerDelete(player);
                             }
                             return true;
 

@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import com.herscher.scotchbridge.R;
 import com.herscher.scotchbridge.fragment.NameModificationFragment;
+import com.herscher.scotchbridge.fragment.SimpleQuestionDialogFragment;
 import com.herscher.scotchbridge.model.DeleteHelper;
 import com.herscher.scotchbridge.model.Game;
 import com.herscher.scotchbridge.model.Player;
@@ -35,7 +36,8 @@ import io.realm.RealmChangeListener;
 import io.realm.RealmRecyclerViewAdapter;
 import io.realm.RealmResults;
 
-public class GameListActivity extends Activity implements NameModificationFragment.Listener {
+public class GameListActivity extends Activity implements NameModificationFragment.Listener,
+        SimpleQuestionDialogFragment.Callbacks {
     @BindView(R.id.recycler_view) RecyclerView recyclerView;
     @BindView(R.id.no_games_text) TextView noGamesText;
     @BindView(R.id.toolbar) Toolbar toolbar;
@@ -77,10 +79,25 @@ public class GameListActivity extends Activity implements NameModificationFragme
                                @Nullable final String itemId, @NonNull final String newName) {
         if (itemId == null) {
             // Create new game
-            Game newGame = new Game();
-            newGame.setId(UUID.randomUUID().toString());
+            final String newGameId = UUID.randomUUID().toString();
+            final Game newGame = new Game();
+            newGame.setId(newGameId);
             newGame.setName(newName);
-            createNewGame(newGame, null, null);
+
+            realm.executeTransactionAsync(new Realm.Transaction() {
+                @Override
+                public void execute(Realm r) {
+                    r.copyToRealm(newGame);
+                }
+            }, new Realm.Transaction.OnSuccess() {
+                @Override
+                public void onSuccess() {
+                    // Show the new game
+                    Intent intent = new Intent(GameListActivity.this, PlayerListActivity.class);
+                    intent.putExtra(PlayerListActivity.GAME_ID_KEY, newGameId);
+                    startActivity(intent);
+                }
+            });
         } else {
             realm.executeTransactionAsync(new Realm.Transaction() {
                 @Override
@@ -91,6 +108,14 @@ public class GameListActivity extends Activity implements NameModificationFragme
                     }
                 }
             });
+        }
+    }
+
+    @Override
+    public void onQuestionChoice(SimpleQuestionDialogFragment fragment,
+                                 SimpleQuestionDialogFragment.Choice choice, String data) {
+        if (choice == SimpleQuestionDialogFragment.Choice.POSITIVE) {
+            DeleteHelper.deleteGame(data, realm, null);
         }
     }
 
@@ -106,35 +131,18 @@ public class GameListActivity extends Activity implements NameModificationFragme
         startActivity(intent);
     }
 
-    private void createNewGame(@NonNull final Game game, final List<Player> players, final List<Score> scores) {
-        realm.executeTransactionAsync(new Realm.Transaction() {
-            @Override
-            public void execute(Realm r) {
-                r.copyToRealm(game);
-
-                if (players != null) {
-                    r.copyToRealm(players);
-                }
-
-                if (scores != null) {
-                    r.copyToRealm(scores);
-                }
-            }
-        });
-    }
-
     private RealmChangeListener<RealmResults<Game>> gameChangeListener =
             new RealmChangeListener<RealmResults<Game>>() {
                 @Override
                 public void onChange(RealmResults<Game> gameList) {
                     // For some reason this looks better slightly delayed
                     final boolean isEmpty = gameList.size() == 0;
-                    new Handler().post(new Runnable() {
+                    new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             noGamesText.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
                         }
-                    });
+                    }, 250);
                 }
             };
 
@@ -173,7 +181,15 @@ public class GameListActivity extends Activity implements NameModificationFragme
                     switch (menuItem.getItemId()) {
                         case R.id.action_delete:
                             if (game != null) {
-                                DeleteHelper.deleteGame(game.getId(), realm, null);
+                                DialogFragment f =
+                                        SimpleQuestionDialogFragment.newInstance(
+                                                "Delete Game",
+                                                "Are you sure you want to delete this game?",
+                                                "No",
+                                                "Yes",
+                                                game.getId());
+
+                                f.show(getFragmentManager(), "DeleteGameFragment");
                             }
                             return true;
 

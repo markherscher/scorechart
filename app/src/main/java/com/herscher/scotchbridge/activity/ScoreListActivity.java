@@ -255,7 +255,7 @@ public class ScoreListActivity extends Activity implements ScoreModificationFrag
         }
 
         String valueToString(int value, boolean showPositive) {
-            if (showPositive && value > 0) {
+            if (showPositive && value >= 0) {
                 return "+" + value;
             } else {
                 return value + "";
