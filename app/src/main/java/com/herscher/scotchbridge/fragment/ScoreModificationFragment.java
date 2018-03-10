@@ -6,6 +6,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -26,10 +27,11 @@ public class ScoreModificationFragment extends DialogFragment {
     private Listener listener;
     private String playerId;
     private int scoreIndex;
+    private boolean showDeleteConfirm;
 
     @BindView(R.id.title_text) TextView titleText;
     @BindView(R.id.value_entry) EditText valueEntry;
-    @BindView(R.id.delete_button) View deleteButton;
+    @BindView(R.id.delete_button) Button deleteButton;
 
     public static ScoreModificationFragment newInstance(@NonNull String playerId, int scoreIndex) {
         ScoreModificationFragment fragment = new ScoreModificationFragment();
@@ -148,11 +150,16 @@ public class ScoreModificationFragment extends DialogFragment {
 
     @OnClick(R.id.delete_button)
     void onDeleteButton() {
-        if (listener != null) {
-            listener.onScoreDeleted(playerId, scoreIndex);
-        }
+        if (showDeleteConfirm) {
+            if (listener != null) {
+                listener.onScoreDeleted(playerId, scoreIndex);
+            }
 
-        dismiss();
+            dismiss();
+        } else {
+            showDeleteConfirm = true;
+            deleteButton.setText("Confirm?");
+        }
     }
 
     private int getEnteredValue() {
