@@ -1,10 +1,9 @@
-package com.herscher.scotchbridge.activity;
+package com.herscher.scorechart.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,12 +14,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.herscher.scotchbridge.R;
-import com.herscher.scotchbridge.fragment.NameModificationFragment;
-import com.herscher.scotchbridge.fragment.ScoreModificationFragment;
-import com.herscher.scotchbridge.model.DeleteHelper;
-import com.herscher.scotchbridge.model.Player;
-import com.herscher.scotchbridge.model.Score;
+import com.herscher.scorechart.R;
+import com.herscher.scorechart.fragment.NameModificationFragment;
+import com.herscher.scorechart.fragment.ScoreModificationFragment;
+import com.herscher.scorechart.model.DeleteHelper;
+import com.herscher.scorechart.model.Player;
+import com.herscher.scorechart.model.Score;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

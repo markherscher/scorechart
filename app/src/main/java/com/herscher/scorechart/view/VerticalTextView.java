@@ -1,4 +1,4 @@
-package com.herscher.scotchbridge.view;
+package com.herscher.scorechart.view;
 
 import android.content.Context;
 import android.graphics.Canvas;

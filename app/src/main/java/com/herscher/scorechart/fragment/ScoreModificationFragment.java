@@ -1,4 +1,4 @@
-package com.herscher.scotchbridge.fragment;
+package com.herscher.scorechart.fragment;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -10,8 +10,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.herscher.scotchbridge.R;
-import com.herscher.scotchbridge.model.Player;
+import com.herscher.scorechart.R;
+import com.herscher.scorechart.model.Player;
+
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -69,6 +71,7 @@ public class ScoreModificationFragment extends DialogFragment {
             // Editing an existing value
             if (scoreIndex > player.getScores().size()) {
                 throw new IllegalArgumentException(String.format(
+                        Locale.US,
                         "score index of %d is out of bounds %d",
                         scoreIndex, player.getScores().size()));
             }
@@ -121,7 +124,6 @@ public class ScoreModificationFragment extends DialogFragment {
     @OnClick(R.id.decrement_multiple)
     void onDecrementMultiple() {
         setEnteredValue(getEnteredValue() - MULTIPLE_ADJUST_VALUE);
-
     }
 
     @OnClick(R.id.decrement)

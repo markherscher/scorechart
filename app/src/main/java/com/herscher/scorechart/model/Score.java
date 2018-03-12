@@ -1,4 +1,4 @@
-package com.herscher.scotchbridge.model;
+package com.herscher.scorechart.model;
 
 import io.realm.RealmObject;
 

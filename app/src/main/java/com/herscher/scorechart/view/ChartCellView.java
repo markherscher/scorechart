@@ -1,4 +1,4 @@
-package com.herscher.scotchbridge.view;
+package com.herscher.scorechart.view;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.herscher.scotchbridge.R;
+import com.herscher.scorechart.R;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

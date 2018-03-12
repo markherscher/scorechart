@@ -1,4 +1,4 @@
-package com.herscher.scotchbridge.fragment;
+package com.herscher.scorechart.fragment;
 
 import android.app.Dialog;
 import android.content.Context;

@@ -1,4 +1,4 @@
-package com.herscher.scotchbridge.fragment;
+package com.herscher.scorechart.fragment;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -10,7 +10,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.herscher.scotchbridge.R;
+import com.herscher.scorechart.R;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

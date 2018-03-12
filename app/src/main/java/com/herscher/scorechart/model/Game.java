@@ -1,4 +1,4 @@
-package com.herscher.scotchbridge.model;
+package com.herscher.scorechart.model;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;

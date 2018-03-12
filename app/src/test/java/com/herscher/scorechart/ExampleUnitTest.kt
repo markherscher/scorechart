@@ -1,4 +1,4 @@
-package com.herscher.scotchbridge
+package com.herscher.scorechart
 
 import org.junit.Test
 

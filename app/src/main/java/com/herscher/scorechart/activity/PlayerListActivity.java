@@ -1,4 +1,4 @@
-package com.herscher.scotchbridge.activity;
+package com.herscher.scorechart.activity;
 
 import android.app.Activity;
 import android.app.DialogFragment;
@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -18,17 +17,16 @@ import android.view.ViewGroup;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import com.herscher.scotchbridge.R;
-import com.herscher.scotchbridge.fragment.NameModificationFragment;
-import com.herscher.scotchbridge.fragment.SimpleQuestionDialogFragment;
-import com.herscher.scotchbridge.model.DeleteHelper;
-import com.herscher.scotchbridge.model.Game;
-import com.herscher.scotchbridge.model.Player;
+import com.herscher.scorechart.R;
+import com.herscher.scorechart.fragment.NameModificationFragment;
+import com.herscher.scorechart.fragment.SimpleQuestionDialogFragment;
+import com.herscher.scorechart.model.DeleteHelper;
+import com.herscher.scorechart.model.Game;
+import com.herscher.scorechart.model.Player;
 
 import java.util.Locale;
 import java.util.UUID;
 
-import butterknife.BindDimen;
 import butterknife.BindInt;
 import butterknife.BindView;
 import butterknife.ButterKnife;
