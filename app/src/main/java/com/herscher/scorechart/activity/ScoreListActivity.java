@@ -1,6 +1,7 @@
 package com.herscher.scorechart.activity;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 import com.herscher.scorechart.R;
 import com.herscher.scorechart.fragment.NameModificationFragment;
 import com.herscher.scorechart.fragment.ScoreModificationFragment;
+import com.herscher.scorechart.fragment.SimpleQuestionDialogFragment;
 import com.herscher.scorechart.model.DeleteHelper;
 import com.herscher.scorechart.model.Player;
 import com.herscher.scorechart.model.Score;
@@ -31,9 +33,10 @@ import io.realm.RealmRecyclerViewAdapter;
 import io.realm.RealmResults;
 
 public class ScoreListActivity extends Activity implements ScoreModificationFragment.Listener,
-        NameModificationFragment.Listener {
+        NameModificationFragment.Listener, SimpleQuestionDialogFragment.Callbacks {
     public final static String PLAYER_ID_KEY = "player_id_key";
     private final static String RENAME_PLAYER_TAG = "rename_player_tag";
+    private final static String DELETE_PLAYER_TAG = "delete_player_tag";
 
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.recycler_view) RecyclerView recyclerView;
@@ -70,7 +73,7 @@ public class ScoreListActivity extends Activity implements ScoreModificationFrag
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_delete:
-                        deletePlayer(playerId);
+                        handlePlayerDelete();
                         return true;
 
                     case R.id.action_rename:
@@ -192,13 +195,29 @@ public class ScoreListActivity extends Activity implements ScoreModificationFrag
         }
     }
 
-    private void deletePlayer(@NonNull final String playerId) {
-        DeleteHelper.deletePlayer(playerId, realm, new Runnable() {
-            @Override
-            public void run() {
-                finish();
-            }
-        });
+    @Override
+    public void onQuestionChoice(SimpleQuestionDialogFragment fragment,
+                                 SimpleQuestionDialogFragment.Choice choice, String data) {
+        if (choice == SimpleQuestionDialogFragment.Choice.POSITIVE) {
+            DeleteHelper.deletePlayer(playerId, realm, new Runnable() {
+                @Override
+                public void run() {
+                    finish();
+                }
+            });
+        }
+    }
+
+    private void handlePlayerDelete() {
+        DialogFragment f =
+                SimpleQuestionDialogFragment.newInstance(
+                        "Delete Player",
+                        "Are you sure you want to delete this player?",
+                        "No",
+                        "Yes",
+                        playerId);
+
+        f.show(getFragmentManager(), DELETE_PLAYER_TAG);
     }
 
     private class PlayerChangeListener implements RealmChangeListener<RealmResults<Player>> {
