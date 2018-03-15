@@ -6,8 +6,10 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -60,6 +62,17 @@ public class NameModificationFragment extends DialogFragment {
         title.setText(titleText);
         name.setText(existingName);
         name.setSelection(existingName.length());
+        name.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        name.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    onOkClicked();
+                    return true;
+                }
+                return false;
+            }
+        });
 
         dialog.setContentView(view);
         return dialog;
