@@ -1,5 +1,6 @@
 package com.herscher.scorechart.fragment;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
@@ -99,6 +100,20 @@ public class ScoreModificationFragment extends DialogFragment {
     public void onSaveInstanceState(Bundle out) {
         super.onSaveInstanceState(out);
         out.putInt(EDIT_VALUE_KEY, getEnteredValue());
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (activity instanceof Listener) {
+            listener = (Listener) activity;
+        } else if (getParentFragment() instanceof Listener) {
+            listener = (Listener) getParentFragment();
+        } else {
+            throw new IllegalStateException(
+                    "Activity or Fragment must extend ScoreModificationFragment.Listener interface");
+        }
     }
 
     @Override
