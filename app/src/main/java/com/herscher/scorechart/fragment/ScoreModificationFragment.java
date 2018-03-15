@@ -24,7 +24,7 @@ public class ScoreModificationFragment extends DialogFragment {
     public static final String PLAYER_ID_KEY = "player_id_key";
     public static final String SCORE_INDEX_KEY = "score_index_key";
     private static final String EDIT_VALUE_KEY = "edit_value_key";
-    private static final int MULTIPLE_ADJUST_VALUE = 5;
+    private static final int MULTIPLE_ADJUST_VALUE = 10;
 
     private Listener listener;
     private String playerId;
