@@ -3,6 +3,7 @@ package com.herscher.scorechart.activity;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -27,6 +28,7 @@ import com.herscher.scorechart.model.Player;
 import java.util.Locale;
 import java.util.UUID;
 
+import butterknife.BindDimen;
 import butterknife.BindInt;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -49,6 +51,7 @@ public class PlayerListActivity extends Activity implements NameModificationFrag
     @BindView(R.id.recycler_view) RecyclerView recyclerView;
     @BindView(R.id.no_players_text) TextView noPlayersText;
     @BindInt(R.integer.score_list_column_count) int columnCount;
+    @BindDimen(R.dimen.game_list_margin) int recyclerViewItemMargin;
 
     private String gameId;
     private Game game;
@@ -92,6 +95,7 @@ public class PlayerListActivity extends Activity implements NameModificationFrag
 
         adapter = new PlayerAdapter(null);
         recyclerView.setLayoutManager(new GridLayoutManager(this, columnCount));
+        recyclerView.addItemDecoration(new MarginItemDecoration());
         recyclerView.setAdapter(adapter);
     }
 
@@ -305,19 +309,31 @@ public class PlayerListActivity extends Activity implements NameModificationFrag
     }
 
     class PlayerAdapter extends RealmRecyclerViewAdapter<Player, PlayerViewHolder> {
-
         PlayerAdapter(@Nullable OrderedRealmCollection<Player> data) {
             super(data, true);
         }
 
+        @NonNull
         @Override
-        public PlayerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public PlayerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             return new PlayerViewHolder(parent);
         }
 
         @Override
-        public void onBindViewHolder(PlayerViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull PlayerViewHolder holder, int position) {
             holder.setPlayer(getItem(position));
+        }
+    }
+
+    private class MarginItemDecoration extends RecyclerView.ItemDecoration {
+        @Override
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            int position = parent.getChildAdapterPosition(view);
+            int column = position % columnCount;
+
+            outRect.left = column == 0 ? recyclerViewItemMargin : 0;
+            outRect.right = recyclerViewItemMargin;
+            outRect.top = recyclerViewItemMargin;
         }
     }
 }

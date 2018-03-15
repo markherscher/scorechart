@@ -4,9 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="@dimen/game_list_margin"
-    android:layout_marginStart="@dimen/game_list_margin"
-    android:layout_marginTop="15dp"
     app:cardCornerRadius="4dp"
     app:cardElevation="5dp">
 
