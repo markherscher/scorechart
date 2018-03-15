@@ -51,7 +51,6 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:lines="1"
-            android:paddingBottom="10dp"
             android:textSize="13sp"
             app:layout_constraintEnd_toEndOf="@+id/score"
             app:layout_constraintStart_toStartOf="@+id/score"
@@ -76,9 +75,10 @@
             android:layout_gravity="center"
             android:background="?actionBarItemBackground"
             android:scaleType="center"
-            android:src="@drawable/ic_add_circle"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            android:src="@drawable/ic_add_gray"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/edit_count"
+            app:layout_constraintTop_toTopOf="@+id/edit_count" />
 
     </android.support.constraint.ConstraintLayout>
 </android.support.v7.widget.CardView>
