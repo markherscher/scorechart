@@ -8,15 +8,24 @@ android {
         applicationId "com.herscher.scotchbridge"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 1
-        versionName "1.0"
+        versionCode 1000
+        versionName "1.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+    }
+    signingConfigs {
+        release {
+            storeFile file("release-keystore.jks")
+            storePassword 'dyWZ5RA8HrURWfTlOyQeZx7IMhb659qioZGi8f5k'
+            keyAlias 'release'
+            keyPassword 'Afi1cOnNmI1ISk4U7FJMYsodtDbyaUFN1OoQcM3G'
+        }
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
