@@ -20,10 +20,12 @@ import android.widget.TextView;
 
 import com.herscher.scorechart.R;
 import com.herscher.scorechart.fragment.NameModificationFragment;
+import com.herscher.scorechart.fragment.ScoreModificationFragment;
 import com.herscher.scorechart.fragment.SimpleQuestionDialogFragment;
 import com.herscher.scorechart.model.DeleteHelper;
 import com.herscher.scorechart.model.Game;
 import com.herscher.scorechart.model.Player;
+import com.herscher.scorechart.model.Score;
 
 import java.util.Locale;
 import java.util.UUID;
@@ -40,7 +42,7 @@ import io.realm.RealmRecyclerViewAdapter;
 import io.realm.RealmResults;
 
 public class PlayerListActivity extends Activity implements NameModificationFragment.Listener,
-        SimpleQuestionDialogFragment.Callbacks {
+        SimpleQuestionDialogFragment.Callbacks, ScoreModificationFragment.Listener {
     public static final String GAME_ID_KEY = "game_id_key";
     private static final String GAME_RENAME_TAG = "game_rename_tag";
     private static final String PLAYER_RENAME_TAG = "player_rename_tag";
@@ -147,6 +149,30 @@ public class PlayerListActivity extends Activity implements NameModificationFrag
                 DeleteHelper.deletePlayer(data, realm, null);
             }
         }
+    }
+
+    @Override
+    public void onScoreModified(final String playerId, int scoreIndex, final int scoreValue) {
+        // A new value
+        realm.executeTransactionAsync(
+                new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm r) {
+                        Score newScore = new Score();
+                        newScore.setScoreChange(scoreValue);
+
+                        Player player = r.where(Player.class).equalTo(Player.ID, playerId)
+                                .findFirst();
+                        if (player != null) {
+                            player.getScores().add(newScore);
+                        }
+                    }
+                });
+    }
+
+    @Override
+    public void onScoreDeleted(String playerId, int scoreIndex) {
+        // Can't delete a score from here
     }
 
     private void renamePlayer(final String itemId, final String newName) {
@@ -288,6 +314,13 @@ public class PlayerListActivity extends Activity implements NameModificationFrag
         @OnClick(R.id.player_menu)
         void onModifyClicked() {
             popupMenu.show();
+        }
+
+        @OnClick(R.id.quick_add)
+        void onQuickAddClicked() {
+            ScoreModificationFragment fragment = ScoreModificationFragment.newInstance(
+                    player.getId(), -1);
+            fragment.show(getFragmentManager(), "ScoreModificationFragment");
         }
 
         @OnClick(R.id.container)
